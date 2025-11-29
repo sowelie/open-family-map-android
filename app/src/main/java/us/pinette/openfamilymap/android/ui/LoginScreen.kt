@@ -10,10 +10,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import us.pinette.openfamilymap.android.data.LoginViewModel
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
     // UI state from ViewModel
+    val isServerConfigured by viewModel.isServerConfigured.collectAsState()
     val baseUrl by viewModel.baseUrl.collectAsState()
     val username by viewModel.username.collectAsState()
     val password by viewModel.password.collectAsState()
@@ -21,18 +23,7 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
     val errorMessage by viewModel.error.collectAsState()
     val isSuccess by viewModel.isSuccess.collectAsState()
 
-    // Snackbar for showing error / success messages
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    // Show Snackbar when there is a new message
-    LaunchedEffect(errorMessage, isSuccess) {
-        errorMessage?.let { snackbarHostState.showSnackbar(it) }
-        if (isSuccess) snackbarHostState.showSnackbar("Login successful!")
-    }
-
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-    ) { innerPadding ->
+    Scaffold() { innerPadding ->
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -40,23 +31,7 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            if (!viewModel.serverIsConfigured()) {
-                Text(
-                    text ="Enter your server URL",
-                    style = MaterialTheme.typography.headlineMedium
-                )
-
-                OutlinedTextField(
-                    value = baseUrl,
-                    onValueChange = viewModel::onBaseUrlChange,
-                    label = { Text("Server URL") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Next
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            } else {
+            if (isServerConfigured) {
                 Text(
                     text = "Please log in",
                     style = MaterialTheme.typography.headlineMedium
@@ -110,6 +85,49 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
                         text = "You are now logged in",
                         color = MaterialTheme.colorScheme.primary,
                     )
+                }
+            } else {
+                Text(
+                    text ="Enter your server URL",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+
+                OutlinedTextField(
+                    value = baseUrl,
+                    onValueChange = viewModel::onBaseUrlChange,
+                    label = { Text("Server URL") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        imeAction = ImeAction.Next
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                    supportingText = {
+                        if (baseUrl.isNotEmpty() && !errorMessage.isNullOrEmpty()) {
+                            Text(
+                                text = errorMessage!!,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                )
+
+                Button(
+                    onClick = { viewModel.checkServerConfiguration() },
+                    enabled = !isLoading && baseUrl.isNotBlank(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                ) {
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.dp,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .padding(end = 8.dp)
+                        )
+                    }
+                    Text("Next")
                 }
             }
         }

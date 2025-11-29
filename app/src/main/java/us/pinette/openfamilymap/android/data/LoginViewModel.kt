@@ -1,5 +1,6 @@
 package us.pinette.openfamilymap.android.data
 
+import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -9,6 +10,8 @@ import kotlinx.coroutines.launch
 import us.pinette.openfamilymap.android.services.APIService
 import us.pinette.openfamilymap.android.services.LoginRequest
 import javax.inject.Inject
+import androidx.core.content.edit
+import us.pinette.openfamilymap.android.di.BaseUrlInterceptor
 
 /**
  * A very lightweight ViewModel that exposes UI‑state as StateFlow.
@@ -16,7 +19,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val apiService: APIService
+    private val apiService: APIService,
+    private val sharedPreferences: SharedPreferences
 ) : ViewModel() {
 
     private val _baseUrl = MutableStateFlow("")
@@ -38,6 +42,13 @@ class LoginViewModel @Inject constructor(
 
     private val _isSuccess = MutableStateFlow(false)
     val isSuccess: StateFlow<Boolean> = _isSuccess.asStateFlow()
+
+    private val _isServerConfigured = MutableStateFlow(false)
+    val isServerConfigured: StateFlow<Boolean> = _isServerConfigured.asStateFlow()
+
+    init {
+        checkServerConfiguration()
+    }
 
     // ---- User interactions ----
 
@@ -70,7 +81,6 @@ class LoginViewModel @Inject constructor(
                 // Fake network delay
                 val result = apiService.login(LoginRequest(_username.value, _password.value))
 
-                // Fake validation – you can replace this block
                 if (result.accessToken.isNotEmpty()) {
                     _isSuccess.value = true
                 } else {
@@ -87,7 +97,38 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun serverIsConfigured(): Boolean {
+    fun checkServerConfiguration() {
+        _isServerConfigured.value = false
 
+        // Reset old state
+        _error.value = null
+
+        // Guard against concurrent calls
+        if (_isLoading.value || _baseUrl.value.isEmpty()) return
+
+        // update the preference for baseUrl
+        sharedPreferences.edit {
+            putString(BaseUrlInterceptor.API_BASE_URL_PREF, _baseUrl.value)
+        }
+
+        viewModelScope.launch {
+            _isLoading.value = true
+
+            try {
+                val result = apiService.status()
+
+                if (result.openFamilyMapApiVersion.isNotEmpty()) {
+                    _isServerConfigured.value = true
+                } else {
+                    // Simulate API error
+                    throw IllegalArgumentException("Invalid credentials")
+                }
+            } catch (e: Exception) {
+                // In a real scenario you might want to parse HTTP error codes
+                _error.value = e.message ?: "Something went wrong"
+            } finally {
+                _isLoading.value = false
+            }
+        }
     }
 }

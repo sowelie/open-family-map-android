@@ -10,7 +10,8 @@ class BaseUrlInterceptor(
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        val baseUrl = prefs.getString("base_url", "https://example.com")!!
+        val baseUrl = prefs.getString(API_BASE_URL_PREF, "https://example.com")!!
+            .ifEmpty { "https://example.com" }
 
         val newUrl = chain.request().url.newBuilder()
             .scheme(baseUrl.toHttpUrlOrNull()!!.scheme)
@@ -23,5 +24,9 @@ class BaseUrlInterceptor(
             .build()
 
         return chain.proceed(newRequest)
+    }
+
+    companion object {
+        const val API_BASE_URL_PREF = "api_base_url"
     }
 }
