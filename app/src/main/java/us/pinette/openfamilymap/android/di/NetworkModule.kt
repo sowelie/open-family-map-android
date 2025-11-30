@@ -12,6 +12,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import us.pinette.openfamilymap.android.services.APIService
+import us.pinette.openfamilymap.android.services.AuthService
 import javax.inject.Singleton
 
 @Module
@@ -53,6 +54,15 @@ object NetworkModule {
         retrofit: Retrofit
     ): APIService {
         return retrofit.create(APIService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthService(
+        apiService: APIService,
+        sharedPreferences: SharedPreferences
+    ): AuthService {
+        return AuthService(sharedPreferences, apiService)
     }
 
     @Singleton

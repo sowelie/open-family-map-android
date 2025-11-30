@@ -14,9 +14,12 @@ interface APIService {
 
     @GET("status")
     suspend fun status(): StatusResponse
+
+    @GET("auth/userInfo")
+    suspend fun getUserInfo(): UserInfoResponse
 }
 
-data class RefreshRequest(val stuff: String = "")
+data class RefreshRequest(val refreshToken: String = "")
 
 data class LoginResponse(
     val accessToken: String,
@@ -32,4 +35,10 @@ data class StatusResponse(
     val status: String,
     val timestamp: String,
     val openFamilyMapApiVersion: String
+)
+
+data class UserInfoResponse(
+    val id: Int,
+    val login: String,
+    val displayName: String
 )

@@ -12,6 +12,7 @@ import us.pinette.openfamilymap.android.services.LoginRequest
 import javax.inject.Inject
 import androidx.core.content.edit
 import us.pinette.openfamilymap.android.di.BaseUrlInterceptor
+import us.pinette.openfamilymap.android.services.AuthService
 
 /**
  * A very lightweight ViewModel that exposes UI‑state as StateFlow.
@@ -20,10 +21,11 @@ import us.pinette.openfamilymap.android.di.BaseUrlInterceptor
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val apiService: APIService,
+    private val authService: AuthService,
     private val sharedPreferences: SharedPreferences
 ) : ViewModel() {
 
-    private val _baseUrl = MutableStateFlow("")
+    private val _baseUrl = MutableStateFlow(sharedPreferences.getString(BaseUrlInterceptor.API_BASE_URL_PREF, "")!!)
     val baseUrl: StateFlow<String> = _baseUrl.asStateFlow()
 
     // Input state
@@ -79,7 +81,7 @@ class LoginViewModel @Inject constructor(
             _isLoading.value = true
             try {
                 // Fake network delay
-                val result = apiService.login(LoginRequest(_username.value, _password.value))
+                val result = authService.login(_username.value, _password.value)
 
                 if (result.accessToken.isNotEmpty()) {
                     _isSuccess.value = true

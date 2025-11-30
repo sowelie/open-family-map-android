@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "us.pinette.openfamilymap.android"
-        minSdk = 24
+        minSdk = 30
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -52,18 +52,18 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation("androidx.navigation:navigation-compose:2.9.6")
-    implementation("androidx.hilt:hilt-navigation-compose:1.3.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
-    implementation("com.squareup.retrofit2:retrofit:3.0.0")
-    implementation("com.squareup.retrofit2:converter-moshi:3.0.0")
-    implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.google.dagger:hilt-android:2.57.2")
-    implementation("androidx.datastore:datastore-preferences:1.2.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
-    ksp("com.google.dagger:hilt-android-compiler:2.57.2")
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.retrofit)
+    implementation(libs.converter.moshi)
+    implementation(libs.moshi.kotlin)
+    implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.datastore.preferences)
+    ksp(libs.hilt.android.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

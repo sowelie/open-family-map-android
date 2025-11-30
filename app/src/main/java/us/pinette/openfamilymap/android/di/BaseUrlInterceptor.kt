@@ -12,15 +12,17 @@ class BaseUrlInterceptor(
     override fun intercept(chain: Interceptor.Chain): Response {
         val baseUrl = prefs.getString(API_BASE_URL_PREF, "https://example.com")!!
             .ifEmpty { "https://example.com" }
+            .toHttpUrlOrNull()!!
 
         val newUrl = chain.request().url.newBuilder()
-            .scheme(baseUrl.toHttpUrlOrNull()!!.scheme)
-            .host(baseUrl.toHttpUrlOrNull()!!.host)
-            .port(baseUrl.toHttpUrlOrNull()!!.port)
+            .scheme(baseUrl.scheme)
+            .host(baseUrl.host)
+            .port(baseUrl.port)
             .build()
 
         val newRequest = chain.request().newBuilder()
             .url(newUrl)
+            .header("Authorization", "Bearer ${prefs.getString("accessToken", "")}")
             .build()
 
         return chain.proceed(newRequest)
