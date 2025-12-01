@@ -29,6 +29,7 @@ import us.pinette.openfamilymap.android.ui.WelcomeScreen
 import us.pinette.openfamilymap.android.ui.theme.OpenFamilyMapTheme
 import javax.inject.Inject
 import androidx.compose.runtime.collectAsState
+import us.pinette.openfamilymap.android.ui.LoadingScreen
 
 @AndroidEntryPoint
 class MainActivity() : ComponentActivity() {
@@ -53,9 +54,11 @@ fun OpenFamilyMapApp(
     Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
         NavHost(
             navController = navController,
-            startDestination = if (mainViewModel.userInfo.collectAsState().value == null)
-                Screens.Login.name
-            else Screens.Welcome.name,
+            startDestination = if (mainViewModel.loading.collectAsState().value)
+                    Screens.Loading.name
+                else if (mainViewModel.userInfo.collectAsState().value == null)
+                    Screens.Login.name
+                else Screens.Welcome.name,
             modifier = Modifier.padding(16.dp)
         ) {
             composable(route = Screens.Login.name) {
@@ -64,6 +67,10 @@ fun OpenFamilyMapApp(
 
             composable(route = Screens.Welcome.name) {
                 WelcomeScreen()
+            }
+
+            composable(route = Screens.Loading.name) {
+                LoadingScreen()
             }
         }
     }

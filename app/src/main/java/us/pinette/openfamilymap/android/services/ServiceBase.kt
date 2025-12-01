@@ -16,7 +16,7 @@ abstract class ServiceBase(
                 .takeIf { it != -1L }?.let { Instant.ofEpochMilli(it) }
 
         if (Duration.between(savedInstant ?: Instant.MIN, Instant.now()).toMinutes() > 10) {
-            Log.d("open-family-map", "accessToken: ${sharedPreferences.getString("accessToken", "")} refreshToken: ${sharedPreferences.getString("refreshToken", "")}")
+            Log.d("open-family-map", "Refreshing jwt for accessToken: ${sharedPreferences.getString("accessToken", "")} refreshToken: ${sharedPreferences.getString("refreshToken", "")}")
 
             try {
                 val result = apiService.refresh(RefreshRequest(refreshToken = sharedPreferences.getString("refreshToken", "")!!))

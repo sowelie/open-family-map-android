@@ -18,9 +18,13 @@ class MainViewModel @Inject constructor(
     private val _userInfo = MutableStateFlow<UserInfoResponse?>(null)
     val userInfo: StateFlow<UserInfoResponse?> = _userInfo.asStateFlow()
 
+    private val _loading = MutableStateFlow(true)
+    val loading: StateFlow<Boolean> = _loading.asStateFlow()
+
     init {
         viewModelScope.launch {
             _userInfo.value = authService.getUserInfo()
+            _loading.value = false
         }
     }
 }
