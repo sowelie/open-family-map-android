@@ -1,6 +1,7 @@
 package us.pinette.openfamilymap.android.data
 
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -80,8 +81,12 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
+                Log.d("stuff", "Stuff")
+
                 // Fake network delay
                 val result = authService.login(_username.value, _password.value)
+
+                Log.d("stuff", "Result ${result.accessToken}")
 
                 if (result.accessToken.isNotEmpty()) {
                     _isSuccess.value = true
@@ -91,6 +96,7 @@ class LoginViewModel @Inject constructor(
                 }
 
             } catch (e: Exception) {
+                Log.e("Login error", e.message!!)
                 // In a real scenario you might want to parse HTTP error codes
                 _error.value = e.message ?: "Something went wrong"
             } finally {
@@ -105,6 +111,8 @@ class LoginViewModel @Inject constructor(
         // Reset old state
         _error.value = null
 
+        Log.d("stuff", _baseUrl.value)
+
         // Guard against concurrent calls
         if (_isLoading.value || _baseUrl.value.isEmpty()) return
 
@@ -118,6 +126,8 @@ class LoginViewModel @Inject constructor(
 
             try {
                 val result = apiService.status()
+
+                Log.d("stuff", result.status)
 
                 if (result.openFamilyMapApiVersion.isNotEmpty()) {
                     _isServerConfigured.value = true

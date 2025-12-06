@@ -13,7 +13,7 @@ import us.pinette.openfamilymap.android.data.LoginViewModel
 import androidx.compose.runtime.collectAsState
 
 @Composable
-fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
+fun LoginScreen(viewModel: LoginViewModel = hiltViewModel(), onDone: () -> Unit) {
     // UI state from ViewModel
     val isServerConfigured by viewModel.isServerConfigured.collectAsState()
     val baseUrl by viewModel.baseUrl.collectAsState()
@@ -57,7 +57,15 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
                     keyboardOptions = KeyboardOptions.Default.copy(
                         imeAction = ImeAction.Done
                     ),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    supportingText = {
+                        if (baseUrl.isNotEmpty() && !errorMessage.isNullOrEmpty()) {
+                            Text(
+                                text = errorMessage!!,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
                 )
 
                 Button(
@@ -85,6 +93,8 @@ fun LoginScreen(viewModel: LoginViewModel = hiltViewModel()) {
                         text = "You are now logged in",
                         color = MaterialTheme.colorScheme.primary,
                     )
+
+                    onDone()
                 }
             } else {
                 Text(

@@ -21,10 +21,17 @@ class MainViewModel @Inject constructor(
     private val _loading = MutableStateFlow(true)
     val loading: StateFlow<Boolean> = _loading.asStateFlow()
 
+    private val _permissionFlowComplete = MutableStateFlow(false)
+    val permissionFlowComplete: StateFlow<Boolean> = _permissionFlowComplete.asStateFlow()
+
     init {
         viewModelScope.launch {
             _userInfo.value = authService.getUserInfo()
             _loading.value = false
         }
+    }
+
+    fun completePermissionFlow() {
+        _permissionFlowComplete.value = true
     }
 }

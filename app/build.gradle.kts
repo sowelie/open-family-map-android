@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.retrofit)
     implementation(libs.converter.moshi)
@@ -63,6 +64,12 @@ dependencies {
     implementation(libs.logging.interceptor)
     implementation(libs.hilt.android)
     implementation(libs.androidx.datastore.preferences)
+    // Location / Activity Recognition
+    implementation(libs.play.services.location)
+    implementation(libs.play.services.ads.identifier)
+    // for ActivityRecognition
+    // Permission helper
+    implementation(libs.accompanist.permissions)
     ksp(libs.hilt.android.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

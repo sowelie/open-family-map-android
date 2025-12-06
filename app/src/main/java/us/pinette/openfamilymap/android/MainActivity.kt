@@ -1,5 +1,6 @@
 package us.pinette.openfamilymap.android
 
+import android.Manifest
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -29,18 +30,31 @@ import us.pinette.openfamilymap.android.ui.WelcomeScreen
 import us.pinette.openfamilymap.android.ui.theme.OpenFamilyMapTheme
 import javax.inject.Inject
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import us.pinette.openfamilymap.android.permissions.PermissionStatus
+import us.pinette.openfamilymap.android.permissions.getPermissionStatus
+import us.pinette.openfamilymap.android.services.ActivityTransitionManager
+import us.pinette.openfamilymap.android.ui.BackgroundLocationExplanation
+import us.pinette.openfamilymap.android.ui.BackgroundLocationRequestScreen
+import us.pinette.openfamilymap.android.ui.ForegroundAndActivityPermissionScreen
 import us.pinette.openfamilymap.android.ui.LoadingScreen
 
 @AndroidEntryPoint
 class MainActivity() : ComponentActivity() {
     @Inject lateinit var authService: AuthService
+    @Inject lateinit var activityTransitionManager: ActivityTransitionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             OpenFamilyMapTheme {
-                OpenFamilyMapApp()
+                OpenFamilyMapApp(activityTransitionManager = activityTransitionManager)
             }
         }
     }
@@ -49,7 +63,8 @@ class MainActivity() : ComponentActivity() {
 @Composable
 fun OpenFamilyMapApp(
     mainViewModel: MainViewModel = hiltViewModel(),
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    activityTransitionManager: ActivityTransitionManager
 ) {
     Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
         NavHost(
@@ -62,11 +77,21 @@ fun OpenFamilyMapApp(
             modifier = Modifier.padding(16.dp)
         ) {
             composable(route = Screens.Login.name) {
-                LoginScreen()
+                LoginScreen {
+                    navController.navigate(Screens.Welcome.name)
+                }
             }
 
             composable(route = Screens.Welcome.name) {
-                WelcomeScreen()
+                PermissionsFlow {
+                    activityTransitionManager.startMonitoring()
+
+                    mainViewModel.completePermissionFlow()
+                }
+
+                if (mainViewModel.permissionFlowComplete.collectAsState().value) {
+                    WelcomeScreen()
+                }
             }
 
             composable(route = Screens.Loading.name) {
@@ -75,3 +100,23 @@ fun OpenFamilyMapApp(
         }
     }
 }
+
+@Composable
+fun PermissionsFlow(onDone: () -> Unit) {
+    var step by remember { mutableStateOf(0) }
+    val context = LocalContext.current
+    var status by remember {
+        mutableStateOf(context.getPermissionStatus(Manifest.permission.ACCESS_BACKGROUND_LOCATION))
+    }
+
+    if (status == PermissionStatus.Granted) {
+        onDone()
+    }
+
+    when (step) {
+        0 -> ForegroundAndActivityPermissionScreen(onComplete = { step = 1 })
+        1 -> BackgroundLocationExplanation(onNext = { step = 2 }, onSkip = onDone)
+        2 -> BackgroundLocationRequestScreen(onComplete = onDone)
+    }
+}
+
