@@ -2,7 +2,6 @@ package us.pinette.openfamilymap.android
 
 import android.Manifest
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -10,10 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -21,32 +23,26 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import us.pinette.openfamilymap.android.data.MainViewModel
-import us.pinette.openfamilymap.android.services.AuthService
-import us.pinette.openfamilymap.android.services.UserInfoResponse
-import us.pinette.openfamilymap.android.ui.LoginScreen
-import us.pinette.openfamilymap.android.ui.WelcomeScreen
-import us.pinette.openfamilymap.android.ui.theme.OpenFamilyMapTheme
-import javax.inject.Inject
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import us.pinette.openfamilymap.android.permissions.PermissionStatus
 import us.pinette.openfamilymap.android.permissions.getPermissionStatus
+import us.pinette.openfamilymap.android.services.APIService
 import us.pinette.openfamilymap.android.services.ActivityTransitionManager
+import us.pinette.openfamilymap.android.services.AuthService
 import us.pinette.openfamilymap.android.ui.BackgroundLocationExplanation
 import us.pinette.openfamilymap.android.ui.BackgroundLocationRequestScreen
 import us.pinette.openfamilymap.android.ui.ForegroundAndActivityPermissionScreen
 import us.pinette.openfamilymap.android.ui.LoadingScreen
+import us.pinette.openfamilymap.android.ui.LoginScreen
+import us.pinette.openfamilymap.android.ui.WelcomeScreen
+import us.pinette.openfamilymap.android.ui.theme.OpenFamilyMapTheme
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity() : ComponentActivity() {
     @Inject lateinit var authService: AuthService
+
+    @Inject lateinit var apiService: APIService
     @Inject lateinit var activityTransitionManager: ActivityTransitionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {

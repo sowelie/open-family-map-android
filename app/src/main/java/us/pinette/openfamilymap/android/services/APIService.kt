@@ -3,6 +3,8 @@ package us.pinette.openfamilymap.android.services
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import us.pinette.openfamilymap.android.data.LocationUpdateRequest
+import us.pinette.openfamilymap.android.data.LocationUpdateResponse
 import java.time.LocalDateTime
 
 interface APIService {
@@ -17,6 +19,9 @@ interface APIService {
 
     @GET("auth/userInfo")
     suspend fun getUserInfo(): UserInfoResponse
+
+    @POST("locationHistory/update")
+    suspend fun locationUpdate(@Body body: LocationUpdateRequest): LocationUpdateResponse
 }
 
 data class RefreshRequest(val refreshToken: String = "")

@@ -19,6 +19,11 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import us.pinette.openfamilymap.android.data.LocationUpdateRequest
 import javax.inject.Inject
 
 // LocationTrackingService.kt
@@ -28,7 +33,14 @@ class LocationTrackingService : Service() {
     @Inject
     lateinit var fusedLocationClient: FusedLocationProviderClient
 
+    @Inject
+    lateinit var apiService: APIService
+
     private var isTracking = false
+    private val serviceJob = SupervisorJob()
+    private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
+
+    private var userInfo: UserInfoResponse? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -39,6 +51,10 @@ class LocationTrackingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val activityType = intent?.getIntExtra(EXTRA_ACTIVITY_TYPE, DetectedActivity.UNKNOWN)
+
+        serviceScope.launch {
+            userInfo = apiService.getUserInfo()
+        }
 
         if (!isTracking) {
             startForeground(NOTIFICATION_ID, buildNotification(activityType))
@@ -72,6 +88,27 @@ class LocationTrackingService : Service() {
                 // Persist or send to server
                 // e.g. repository.saveLocation(location, activityType)
                 Log.d("Location update", "Location update $location")
+
+                serviceScope.launch {
+                    apiService.locationUpdate(
+                        LocationUpdateRequest(
+                            userId = userInfo!!.id,
+                            platform = "Android",
+                            rawProvider = location.provider,
+                            latitude = location.latitude,
+                            longitude = location.longitude,
+                            altitudeMeters = location.altitude,
+                            verticalAccuracyMeters = location.verticalAccuracyMeters.toDouble(),
+                            horizontalAccuracyMeters = null,
+                            bearingDegrees = location.bearing.toDouble(),
+                            bearingAccuracyDegrees = location.bearingAccuracyDegrees.toDouble(),
+                            speedMetersPerSecond = location.speed.toDouble(),
+                            speedAccuracyMetersPerSecond = location.speedAccuracyMetersPerSecond.toDouble(),
+                            floorLevel = null,
+                            isMock = false
+                        )
+                    )
+                }
             }
         }
     }
