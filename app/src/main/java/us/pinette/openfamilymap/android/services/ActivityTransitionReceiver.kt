@@ -12,17 +12,13 @@ import com.google.android.gms.location.DetectedActivity
 open class ActivityTransitionReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d("ActivityTransitionReceiver", "Activity transition receive: $intent")
-
         if (!ActivityTransitionResult.hasResult(intent)) return
 
         val result = ActivityTransitionResult.extractResult(intent) ?: return
 
         for (event in result.transitionEvents) {
             val activityType = event.activityType
-            val transitionType = event.transitionType
-
-            when (transitionType) {
+            when (event.transitionType) {
                 ActivityTransition.ACTIVITY_TRANSITION_ENTER -> {
                     when (activityType) {
                         DetectedActivity.IN_VEHICLE,
@@ -30,11 +26,15 @@ open class ActivityTransitionReceiver : BroadcastReceiver() {
                         DetectedActivity.ON_FOOT,
                         DetectedActivity.WALKING,
                         DetectedActivity.RUNNING -> {
+                            Log.d("ActivityTransitionReceiver", "Received transition type ${activityType}, starting background location service.")
+
                             // User started moving → start location tracking
                             LocationTrackingService.start(context, activityType)
                         }
                         DetectedActivity.STILL -> {
                             // Entered STILL (optional, depending how you configure)
+                            Log.d("ActivityTransitionReceiver", "Received transition type ${activityType}, stopping background location service.")
+
                             LocationTrackingService.stop(context)
                         }
                     }

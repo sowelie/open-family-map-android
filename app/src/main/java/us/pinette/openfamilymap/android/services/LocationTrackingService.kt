@@ -52,6 +52,8 @@ class LocationTrackingService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val activityType = intent?.getIntExtra(EXTRA_ACTIVITY_TYPE, DetectedActivity.UNKNOWN)
 
+        Log.d("LocationTrackingService", "Started tracking user location.")
+
         serviceScope.launch {
             userInfo = apiService.getUserInfo()
         }
@@ -147,7 +149,7 @@ class LocationTrackingService : Service() {
                 "Location Tracking",
                 NotificationManager.IMPORTANCE_LOW
             )
-            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+            (getSystemService(NOTIFICATION_SERVICE) as NotificationManager)
                 .createNotificationChannel(channel)
         }
     }
@@ -176,19 +178,19 @@ class LocationTrackingService : Service() {
         private const val EXTRA_ACTIVITY_TYPE = "extra_activity_type"
 
         fun start(context: Context, activityType: Int?) {
-            val intent = Intent(context, LocationTrackingService::class.java).apply {
+            val appContext = context.applicationContext
+
+            val intent = Intent(appContext, LocationTrackingService::class.java).apply {
                 putExtra(EXTRA_ACTIVITY_TYPE, activityType)
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
-            }
+            context.startForegroundService(intent)
         }
 
         fun stop(context: Context) {
-            context.stopService(Intent(context, LocationTrackingService::class.java))
+            val appContext = context.applicationContext
+
+            context.stopService(Intent(appContext, LocationTrackingService::class.java))
         }
     }
 }

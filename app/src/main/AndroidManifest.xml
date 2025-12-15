@@ -9,6 +9,8 @@
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
     <!-- Needed for Activity Recognition -->
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
     <application
         android:name=".OpenFamilyMapApplication"
@@ -41,6 +43,11 @@
                 <action android:name="us.pinette.ACTION_PROCESS_ACTIVITY_TRANSITIONS" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".services.LocationTrackingService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
     </application>
 
 </manifest>
