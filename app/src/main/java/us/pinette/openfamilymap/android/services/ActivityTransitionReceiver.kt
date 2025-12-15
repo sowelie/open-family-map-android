@@ -3,14 +3,17 @@ package us.pinette.openfamilymap.android.services
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.google.android.gms.location.ActivityTransition
 import com.google.android.gms.location.ActivityTransitionResult
 import com.google.android.gms.location.DetectedActivity
 
 // ActivityTransitionReceiver.kt
-class ActivityTransitionReceiver : BroadcastReceiver() {
+open class ActivityTransitionReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
+        Log.d("ActivityTransitionReceiver", "Activity transition receive: $intent")
+
         if (!ActivityTransitionResult.hasResult(intent)) return
 
         val result = ActivityTransitionResult.extractResult(intent) ?: return

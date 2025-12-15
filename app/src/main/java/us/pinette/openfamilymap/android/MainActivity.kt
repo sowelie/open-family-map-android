@@ -2,6 +2,7 @@ package us.pinette.openfamilymap.android
 
 import android.Manifest
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -80,7 +81,11 @@ fun OpenFamilyMapApp(
 
             composable(route = Screens.Welcome.name) {
                 PermissionsFlow {
-                    activityTransitionManager.startMonitoring()
+                    if (!mainViewModel.permissionFlowComplete.value) {
+                        Log.d("OpenFamilyMapApp", "Starting activity transition monitoring.")
+
+                        activityTransitionManager.startMonitoring()
+                    }
 
                     mainViewModel.completePermissionFlow()
                 }

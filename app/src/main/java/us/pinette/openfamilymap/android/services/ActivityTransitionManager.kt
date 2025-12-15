@@ -3,6 +3,7 @@ package us.pinette.openfamilymap.android.services
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.google.android.gms.location.ActivityRecognition
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -29,8 +30,8 @@ class ActivityTransitionManager @Inject constructor(
 
         activityRecognitionClient
             .requestActivityTransitionUpdates(request, pendingIntent)
-            .addOnSuccessListener { /* log/emit success */ }
-            .addOnFailureListener { e -> /* handle error */ }
+            .addOnSuccessListener { Log.d("ActivityTransitionManager", "Successfully registered transition listener.") }
+            .addOnFailureListener { e -> Log.e("ActivityTransitionManager", "An exception occurred registering a transition listener $e") }
     }
 
     fun stopMonitoring() {

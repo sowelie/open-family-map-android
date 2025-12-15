@@ -32,6 +32,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver
+            android:name=".services.ActivityTransitionReceiver"
+            android:exported="false"
+            android:permission="com.google.android.gms.permission.ACTIVITY_RECOGNITION">
+            <intent-filter>
+                <action android:name="us.pinette.ACTION_PROCESS_ACTIVITY_TRANSITIONS" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

@@ -48,35 +48,6 @@ class MainViewModel @Inject constructor(
     }
 
     fun updateLocation() {
-        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-        val cancellationTokenSource = CancellationTokenSource()
 
-        fusedLocationClient.getCurrentLocation(
-            Priority.PRIORITY_HIGH_ACCURACY,
-            cancellationTokenSource.token
-        ).addOnSuccessListener { location ->
-            if (location != null) {
-                viewModelScope.launch {
-                    apiService.locationUpdate(
-                        LocationUpdateRequest(
-                            userId = _userInfo.value!!.id,
-                            platform = "Android",
-                            rawProvider = location.provider,
-                            latitude = location.latitude,
-                            longitude = location.longitude,
-                            altitudeMeters = location.altitude,
-                            verticalAccuracyMeters = location.verticalAccuracyMeters.toDouble(),
-                            horizontalAccuracyMeters = null,
-                            bearingDegrees = location.bearing.toDouble(),
-                            bearingAccuracyDegrees = location.bearingAccuracyDegrees.toDouble(),
-                            speedMetersPerSecond = location.speed.toDouble(),
-                            speedAccuracyMetersPerSecond = location.speedAccuracyMetersPerSecond.toDouble(),
-                            floorLevel = null,
-                            isMock = false
-                        )
-                    )
-                }
-            }
-        }
     }
 }
